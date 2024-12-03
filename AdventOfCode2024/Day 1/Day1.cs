@@ -1,28 +1,19 @@
-﻿using System.Text.RegularExpressions;
-
-namespace AdventOfCode2024.Day_1;
+﻿namespace AdventOfCode2024.Day_1;
 
 public class Day1 : IDay
 {
     private (int[], int[]) GetInput()
     {
-        var regeExSplit = new Regex(@"(\s+)");
+        var columns = File.ReadLines(@"Day 1\Day1Input.txt")
+            .Select(l => l.Split()
+                                .Where(s => !string.IsNullOrEmpty(s))
+                                .Select(int.Parse)
+                                .ToArray()
+            )
+            .Select(c => (c.First(), c.Last()))
+            .ToArray();
         
-        var list1 = new List<int>();
-        var list2 = new List<int>();
-
-        foreach (var line in File.ReadLines(@"Day 1\Day1Input.txt"))
-        {
-            if(string.IsNullOrEmpty(line))
-                continue;
-            
-            var values = regeExSplit.Split(line);
-            
-            list1.Add(int.Parse(values[0]));
-            list2.Add(int.Parse(values[2]));
-        }
-        
-        return (list1.ToArray(), list2.ToArray());
+        return (columns.Select(c => c.Item1).ToArray(), columns.Select(c => c.Item2).ToArray());
     }
     
     public void Task1()
