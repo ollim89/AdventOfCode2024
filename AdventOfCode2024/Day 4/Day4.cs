@@ -13,16 +13,16 @@ public class Day4 : IDay
     {
         var input = GetInput();
 
-        var xmasPerRow = input.Select((l, y) => NumberOfXmasesOnRow(l, y, input)).ToArray();
-        var nrOfXmas = xmasPerRow.Sum(r => r);
+        var nrOfXmas = input
+            .Select((l, y) => l.Select((c, x) => NumberOfXmasesOnCell(x, y, input)).Sum(c => c))
+            .Sum(r => r);
 
         Console.WriteLine($"Found {nrOfXmas} Xmases");
     }
 
     private int NumberOfXmasesOnRow(char[] lettersOfRow, int y, char[][] input)
     {
-        var xmasPerCell = lettersOfRow.Select((c, x) => NumberOfXmasesOnCell(x, y, input)).ToArray();
-        return xmasPerCell.Sum(c => c);
+        return lettersOfRow.Select((c, x) => NumberOfXmasesOnCell(x, y, input)).Sum(c => c);
     }
 
     private int NumberOfXmasesOnCell(int x, int y, char[][] input)
@@ -47,8 +47,7 @@ public class Day4 : IDay
             }
 
             var wordString = new string(word);
-            if (wordString == "XMAS") 
-                foundXmases++;
+            if (wordString == "XMAS") foundXmases++;
         }
 
         return foundXmases;
@@ -60,14 +59,45 @@ public class Day4 : IDay
         (x: x + 3, y), //Right
         (x, y: y - 3), //Up
         (x, y: y + 3), // Down
-        (x: x - 4, y: y - 4), //Diagonal left up
-        (x: x + 4, y: y + 4), //Diagonal right down
-        (x: x - 4, y: y + 4), //Diagonal left down
-        (x: x + 4, y: y - 4), //Diagonal right up
+        (x: x - 3, y: y - 3), //Diagonal left up
+        (x: x + 3, y: y + 3), //Diagonal right down
+        (x: x - 3, y: y + 3), //Diagonal left down
+        (x: x + 3, y: y - 3), //Diagonal right up
     ];
 
     public void Task2()
     {
-        throw new NotImplementedException();
+        var input = GetInput();
+        
+        var nrOfCrossMases = NumberOfCrossMasesOnCell(input);
+
+        Console.WriteLine($"Found {nrOfCrossMases} X-mases");
+    }
+
+    private int NumberOfCrossMasesOnCell(char[][] input)
+    {
+        var columns = input[0].Length;
+        var rows = input.Length;
+
+        var foundXmases = 0;
+        for(var y = 1; y < rows - 1; y++)
+        {
+            for(var x = 1; x < columns - 1; x++)
+            {
+                var letter = input[y][x];
+                
+                if(letter != 'A') continue;
+                
+                var diagonalLeft = new string([input[y - 1][x - 1], input[y][x], input[y + 1][x + 1]]);
+                var diagonalRight = new string([input[y + 1][x - 1], input[y][x], input[y - 1][x + 1]]);
+                
+                if(diagonalLeft is "MAS" or "SAM" && diagonalRight is "MAS" or "SAM")
+                {
+                    foundXmases++;
+                }
+            }
+        }
+
+        return foundXmases;
     }
 }
