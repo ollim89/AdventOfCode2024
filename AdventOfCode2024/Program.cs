@@ -3,12 +3,14 @@ using AdventOfCode2024.Day_1;
 using AdventOfCode2024.Day_2;
 using AdventOfCode2024.Day_3;
 using AdventOfCode2024.Day_4;
+using AdventOfCode2024.Day_5;
 
 IDay[] days = [
     new Day1(),
     new Day2(),
     new Day3(),
-    new Day4()
+    new Day4(),
+    new Day5()
 ];
 
 Console.WriteLine($"Which day would you like to run? Enter a number representing the day:");
