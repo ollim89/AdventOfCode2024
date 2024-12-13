@@ -2,9 +2,9 @@
 
 public class Day11 : IDay
 {
-    private string[] GetInput()
+    private Dictionary<long, long> GetInput()
     {
-        return File.ReadAllText(@"Day 11\Day11Input.txt").Trim().Split();
+        return File.ReadAllText(@"Day 11\Day11Input.txt").Trim().Split().Select(long.Parse).ToDictionary(s => s, s => 1l);
     }
     
     public void Task1()
@@ -12,29 +12,58 @@ public class Day11 : IDay
         Console.WriteLine($"Number of stones {Blink(25)}");
     }
 
-    private int Blink(int times)
+    private long Blink(int times)
     {
         var stones = GetInput();
+        var splits = new Dictionary<long, (long, long)>();
+        
         for (var i = 0; i < times; i++)
         {
-            Console.WriteLine($"Running blink {i}");
-            stones = stones.SelectMany(Blink).ToArray();
+            stones = Blink(stones, splits);
         }
         
-        return stones.Length;
+        return stones.Values.Sum();
     }
     
-    private string[] Blink(string stone)
+    private Dictionary<long, long> Blink(Dictionary<long, long> stones, Dictionary<long, (long, long)> splits)
     {
-        if (stone == "0") return ["1"];
-
-        if (stone.Length % 2 == 0)
+        var newStones = new Dictionary<long, long>();
+        
+        if (stones.TryGetValue(0, out var zeroCount))
         {
-            var chunks = stone.Chunk(stone.Length / 2).Select(c => new string(c)). ToArray();
-            return [chunks.First(), int.Parse(chunks.Last()).ToString()];
+            AddOrIncreaseStone(1, zeroCount, newStones);
+        }
+        
+        foreach(var stone in stones.Where(s => s.Key != 0))
+        {
+            if(splits.TryGetValue(stone.Key, out var split))
+            {
+                AddOrIncreaseStone(split.Item1, stone.Value, newStones);
+                AddOrIncreaseStone(split.Item2, stone.Value, newStones);
+            }
+            else if (stone.Key.ToString().Length % 2 == 0)
+            {
+                var strStone = stone.Key.ToString();
+                var chunks = strStone.Chunk(strStone.Length / 2).Select(c => new string(c)).ToArray();
+                var newSplits = (long.Parse(chunks.First()), long.Parse(chunks.Last()));
+                
+                AddOrIncreaseStone(newSplits.Item1, stone.Value, newStones);
+                AddOrIncreaseStone(newSplits.Item2, stone.Value, newStones);
+                splits[stone.Key] = newSplits;
+            }
+            else
+            {
+                AddOrIncreaseStone(stone.Key * 2024, stone.Value, newStones);
+            }
         }
 
-        return [(long.Parse(stone) * 2024).ToString()];
+        return newStones;
+    }
+
+    private void AddOrIncreaseStone(long stone, long addToCount, Dictionary<long, long> newStones)
+    {
+        var count = newStones.TryGetValue(stone, out var currentCount);
+        newStones[stone] = currentCount + addToCount;
     }
 
     public void Task2()
